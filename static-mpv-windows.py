@@ -154,16 +154,17 @@ pkgs = [
 # "mingw-w64-x86_64-tools-git",
 # "mingw-w64-x86_64-winstorecompat-git",
 # "mingw-w64-x86_64-cmake"
-"mingw-w64-x86_64-dlfcn"
+# "mingw-w64-x86_64-dlfcn",
+"mingw-w64-x86_64-crt-git",
 ]
 for pkg in pkgs:
     url = f"https://packages.msys2.org/packages/{pkg}"
     get_package(url)
 files = os.listdir()
-for file in files:
-    if file.endswith(".pkg.tar.zst"):
-        print(f"\n\nextracting {file}\n--------------------------------------")
-        os.system(f"tar -xvf {file}")
+# for file in files:
+#     if file.endswith(".pkg.tar.zst"):
+#         print(f"\n\nextracting {file}\n--------------------------------------")
+#         os.system(f"tar -xvf {file}")
         
 
 
