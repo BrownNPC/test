@@ -25,6 +25,7 @@ def get_md5(file_name):
             md5_hash.update(byte_block)
     return md5_hash.hexdigest()
 
+scraped_links = []
 def get_package(url):
     """
     Scrapes the given URL, downloads the file, and saves the MD5 checksum.
@@ -100,7 +101,9 @@ def get_package(url):
                 for dep in dependency_links:
                     dep_url = dep['href']
                     print(f"Found dependency: {dep_url}")
-                    get_package(dep_url)  # Recursively download the dependency
+                    if dep_url not in scraped_links:
+                        scraped_links.append(dep_url)
+                        get_package(dep_url)  # Recursively download the dependency
             else:
                 print("No dependency list found.")
         else:
@@ -118,7 +121,8 @@ libx11-dev libxext-dev libxv-dev libvdpau-dev libgl1-mesa-dev \
 libasound2-dev libpulse-dev libfribidi-dev libfreetype6-dev \
 libfontconfig1-dev libjpeg-dev libssl-dev libgnutls28-dev \
 libx264-dev libmp3lame-dev libfdk-aac-dev make wget tar zstd gawk gpg \
-binutils-mingw-w64 mingw-w64 "
+binutils-mingw-w64 mingw-w64 mingw-w64-common libnpth-mingw-w64-dev win-iconv-mingw-w64-dev \
+    mingw-w64-tools "
 
 os.system(f"sudo apt update && sudo apt install -y {deps}")
 
@@ -131,9 +135,30 @@ except:
     pass
 os.chdir("build_libs")
 
-url = "https://packages.msys2.org/packages/mingw-w64-x86_64-mpv"
-get_package(url)
+pkgs = [
+    # "mingw-w64-x86_64-mpv",
+    # "mingw-w64-x86_64-vulkan-loader",
+    # "mingw-w64-x86_64-headers-git"
 
+# "mingw-w64-x86_64-binutils",
+# "mingw-w64-x86_64-crt-git",
+# "mingw-w64-x86_64-gcc",
+# "mingw-w64-x86_64-gdb",
+# "mingw-w64-x86_64-gdb-multiarch",
+# "mingw-w64-x86_64-headers-git",
+# "mingw-w64-x86_64-libmangle-git",
+# "mingw-w64-x86_64-libwinpthread-git",
+# "mingw-w64-x86_64-winpthreads-git",
+# "mingw-w64-x86_64-make",
+# "mingw-w64-x86_64-pkgconf",
+# "mingw-w64-x86_64-tools-git",
+# "mingw-w64-x86_64-winstorecompat-git",
+# "mingw-w64-x86_64-cmake"
+"mingw-w64-x86_64-dlfcn"
+]
+for pkg in pkgs:
+    url = f"https://packages.msys2.org/packages/{pkg}"
+    get_package(url)
 files = os.listdir()
 for file in files:
     if file.endswith(".pkg.tar.zst"):
@@ -142,9 +167,3 @@ for file in files:
         
 
 
-# os.system("export PKG_CONFIG_PATH=$(pwd)/mingw64/lib/pkgconfig:$PKG_CONFIG_PATH")
-
-# os.system("export CC=x86_64-w64-mingw32-gcc")
-# os.system("export CXX=x86_64-w64-mingw32-g++")
-# os.system("export CGO_ENABLED=1")
-# os.system("export GOOS=windows")
