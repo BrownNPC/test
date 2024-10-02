@@ -1,13 +1,9 @@
 import os
+
 import requests
 from bs4 import BeautifulSoup
 import hashlib
 import os
-import requests
-from bs4 import BeautifulSoup
-import hashlib
-import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def download_file(url, file_name):
     """
@@ -91,7 +87,7 @@ def get_package(url):
                 md5_file.write(f"MD5 ({file_name}) = {md5_from_file}\n")
                 print(f"MD5 checksum saved: {md5_from_file}")
 
-        # Find dependencies and download them in parallel
+        # Find dependencies and download them
         dependencies_dt = soup.find('dt', string="Dependencies:")
         if dependencies_dt:
             dependency_list = dependencies_dt.find_next()
@@ -99,16 +95,12 @@ def get_package(url):
                 dependency_links = dependency_list.find_all('a')
                 if dependency_links:
                     print(f"Found {len(dependency_links)} dependencies.")
-                    # Use multithreading to download dependencies
-                    with ThreadPoolExecutor(max_workers=4) as executor:
-                        futures = [executor.submit(get_package, dep['href']) for dep in dependency_links]
-                        for future in as_completed(futures):
-                            try:
-                                future.result()  # To raise exceptions if any
-                            except Exception as exc:
-                                print(f"Error downloading a dependency: {exc}")
                 else:
                     print("No dependencies found.")
+                for dep in dependency_links:
+                    dep_url = dep['href']
+                    print(f"Found dependency: {dep_url}")
+                    get_package(dep_url)  # Recursively download the dependency
             else:
                 print("No dependency list found.")
         else:
@@ -118,7 +110,6 @@ def get_package(url):
     else:
         print(f"Failed to retrieve the page. Status code: {response.status_code}")
         return ''
-
 
 deps = "build-essential git python3 python3-docutils liblua5.2-dev libass-dev libjpeg-dev \
 libx264-dev libfdk-aac-dev libmpv-dev yasm libxcb-shm0-dev \
@@ -132,7 +123,7 @@ binutils-mingw-w64 mingw-w64 "
 os.system(f"sudo apt update && sudo apt install -y {deps}")
 
 os.system("clear")
-print("downloading archices")
+print("downloading deps")
 
 try:
     os.mkdir("build_libs")
