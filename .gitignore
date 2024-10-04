@@ -3,3 +3,5 @@
 !readme.md
 
 !static-mpv*
+!storage
+!docker-compose.yml
